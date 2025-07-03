@@ -10,7 +10,7 @@ export default function Page() {
 
           <div className="space-y-4">
             <Link
-              href="/tools"
+              href="/tools/dhlottery"
               className="block w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-4 px-6 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-md transform hover:scale-105"
             >
               🎰 로또 번호 생성기
