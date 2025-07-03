@@ -1,98 +1,161 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
+import LottoBall from "../../components/LottoBall";
+
+interface LottoResult {
+  totSellamnt: number;
+  returnValue: string;
+  drwNoDate: string;
+  firstWinamnt: number;
+  drwtNo1: number;
+  drwtNo2: number;
+  drwtNo3: number;
+  drwtNo4: number;
+  drwtNo5: number;
+  drwtNo6: number;
+  bnusNo: number;
+  drwNo: number;
+  firstPrzwnerCo: number;
+  firstAccumamnt: number;
+}
 
 export default function LottoPage() {
   const [lottoNumbersList, setLottoNumbersList] = useState<number[][]>([]);
-
-  const getNumberColor = (number: number) => {
-    if (number >= 1 && number <= 10) return "rgb(251, 196, 0)";
-    if (number >= 11 && number <= 20) return "rgb(105, 200, 242)";
-    if (number >= 21 && number <= 30) return "rgb(255, 114, 114)";
-    if (number >= 31 && number <= 40) return "rgb(170, 170, 170)";
-    if (number >= 41 && number <= 45) return "rgb(176, 216, 64)";
-    return "rgb(176, 216, 64)"; // 기본값
-  };
+  const [latestLottoResult, setLatestLottoResult] = useState<LottoResult | null>(null);
+  const [isLoadingLatest, setIsLoadingLatest] = useState(false);
 
   const generateLottoNumbers = () => {
     const numbers: number[] = [];
     while (numbers.length < 6) {
-      const randomNumber = Math.floor(Math.random() * 45) + 1;
-      if (!numbers.includes(randomNumber)) {
-        numbers.push(randomNumber);
-      }
+      const n = Math.floor(Math.random() * 45) + 1;
+      if (!numbers.includes(n)) numbers.push(n);
     }
-    const sortedNumbers = numbers.sort((a, b) => a - b);
-
-    setLottoNumbersList((prev) => {
-      const newList = [sortedNumbers, ...prev];
-      return newList.slice(0, 10); // 최대 10건까지만 유지
-    });
+    setLottoNumbersList((prev) => [[...numbers.sort((a, b) => a - b)], ...prev].slice(0, 10));
   };
 
-  const clearLottoNumbers = () => {
-    setLottoNumbersList([]);
+  const clearLottoNumbers = () => setLottoNumbersList([]);
+
+  const getCurrentDrawNumber = () => {
+    const baseDate = new Date("2025-06-28T21:00:00+09:00");
+    const baseDrawNo = 1178;
+    const now = new Date();
+
+    const thisSaturday = new Date(now);
+    thisSaturday.setDate(now.getDate() + (6 - now.getDay()));
+    thisSaturday.setHours(21, 0, 0, 0);
+
+    let weeksDiff = Math.floor((thisSaturday.getTime() - baseDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
+    if (now < thisSaturday) weeksDiff -= 1;
+
+    return baseDrawNo + weeksDiff;
   };
+
+  const fetchLatestLottoResult = async () => {
+    setIsLoadingLatest(true);
+    try {
+      const currentDrawNo = getCurrentDrawNumber();
+      const res = await fetch(`/api/lotto?drwNo=${currentDrawNo}`);
+      const data = await res.json();
+      if (data.returnValue === "success") {
+        setLatestLottoResult(data);
+      } else {
+        const resPrev = await fetch(`/api/lotto?drwNo=${currentDrawNo - 1}`);
+        const dataPrev = await resPrev.json();
+        if (dataPrev.returnValue === "success") {
+          setLatestLottoResult(dataPrev);
+        }
+      }
+    } catch (err) {
+      console.error("로또 결과 불러오기 실패:", err);
+    } finally {
+      setIsLoadingLatest(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLatestLottoResult();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-8">
-      <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">🎰 로또 번호 생성기</h1>
-            <p className="text-gray-600 mb-4">1-45까지의 번호 중 6개를 무작위로 선택합니다</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 p-6 sm:p-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-10 space-y-10">
+          <div className="text-center">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">🎰 로또 번호 생성기</h1>
+            <p className="text-gray-600 mb-4 text-sm sm:text-base">1~45 중 중복 없는 6개 번호 무작위 추첨</p>
             <a
               href="https://dhlottery.co.kr/gameResult.do?method=byWin"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block text-blue-600 hover:text-blue-800 underline text-sm"
+              className="text-blue-600 hover:text-blue-800 underline text-sm"
             >
               🏆 동행복권 당첨번호 확인하기
             </a>
           </div>
 
-          <div className="mb-8 space-y-3">
+          {/* 최신 당첨번호 */}
+          <div className="text-center">
+            <h2 className="text-lg font-semibold text-gray-700 mb-3">🎯 최신 당첨번호</h2>
+            {isLoadingLatest ? (
+              <p className="text-gray-500">로딩 중...</p>
+            ) : latestLottoResult ? (
+              <>
+                <div className="flex justify-center flex-wrap items-center gap-4 mb-2">
+                  {[
+                    latestLottoResult.drwtNo1,
+                    latestLottoResult.drwtNo2,
+                    latestLottoResult.drwtNo3,
+                    latestLottoResult.drwtNo4,
+                    latestLottoResult.drwtNo5,
+                    latestLottoResult.drwtNo6,
+                  ].map((num, i) => (
+                    <LottoBall key={i} number={num} size="lg" />
+                  ))}
+                  <span className="text-xl font-bold text-black">+</span>
+                  <LottoBall number={latestLottoResult.bnusNo} size="lg" />
+                </div>
+                <div className="text-sm text-gray-500">
+                  {latestLottoResult.drwNo}회차 ({latestLottoResult.drwNoDate})
+                </div>
+              </>
+            ) : (
+              <p className="text-gray-500">당첨번호를 불러올 수 없습니다</p>
+            )}
+          </div>
+
+          {/* 버튼 */}
+          <div className="flex flex-col sm:flex-row gap-4">
             <button
               onClick={generateLottoNumbers}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-md"
+              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 rounded-lg hover:opacity-90 transition"
             >
               번호 생성하기
             </button>
             <button
               onClick={clearLottoNumbers}
-              className="w-full bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold py-3 px-6 rounded-lg hover:from-red-600 hover:to-pink-700 transition-all duration-200 shadow-md"
+              className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 rounded-lg hover:opacity-90 transition"
             >
-              번호 초기화하기
+              초기화
             </button>
           </div>
 
+          {/* 생성된 번호 리스트 */}
           {lottoNumbersList.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4 text-center">
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-gray-700 text-center">
                 생성된 번호 ({lottoNumbersList.length}/10)
-              </h2>
-              <div className="space-y-4">
-                {lottoNumbersList.map((numbers, listIndex) => (
-                  <div key={listIndex} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                    <div className="text-sm text-gray-600 mb-2">#{listIndex + 1}</div>
-                    <div className="grid grid-cols-6 gap-4">
-                      {numbers.map((number, index) => (
-                        <div
-                          key={index}
-                          className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg border-2 border-white"
-                          style={{
-                            backgroundColor: getNumberColor(number),
-                            boxShadow: "0 4px 8px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,255,255,0.3)",
-                          }}
-                        >
-                          {number}
-                        </div>
-                      ))}
-                    </div>
+              </h3>
+              {lottoNumbersList.map((row, idx) => (
+                <div key={idx} className="bg-gray-50 rounded-xl p-4 shadow-sm border border-gray-200">
+                  <div className="text-xs text-gray-400 mb-2">#{idx + 1}</div>
+                  <div className="flex flex-wrap gap-4 justify-center">
+                    {row.map((num, i) => (
+                      <LottoBall key={i} number={num} size="md" />
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
