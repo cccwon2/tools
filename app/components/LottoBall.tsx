@@ -26,7 +26,7 @@ const LottoBall: React.FC<LottoBallProps> = ({ number, size = "md" }) => {
 
   return (
     <div
-      className={`inline-flex items-center justify-center rounded-full border-2 border-white text-white font-bold shadow-md ${dimensions}`}
+      className={`flex items-center justify-center rounded-full border-2 border-white text-white font-bold shadow-md ${dimensions}`}
       style={{
         backgroundColor: color,
         backgroundImage: "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.5), transparent)",

@@ -101,7 +101,7 @@ export default function LottoPage() {
               <p className="text-gray-500">로딩 중...</p>
             ) : latestLottoResult ? (
               <>
-                <div className="flex justify-center flex-wrap items-center gap-4 mb-2">
+                <div className="flex justify-center flex-wrap items-center" style={{ gap: "10px" }}>
                   {[
                     latestLottoResult.drwtNo1,
                     latestLottoResult.drwtNo2,
@@ -149,7 +149,7 @@ export default function LottoPage() {
               {lottoNumbersList.map((row, idx) => (
                 <div key={idx} className="bg-gray-50 rounded-xl p-4 shadow-sm border border-gray-200">
                   <div className="text-xs text-gray-400 mb-2">#{idx + 1}</div>
-                  <div className="flex flex-wrap gap-4 justify-center">
+                  <div className="flex flex-wrap justify-center" style={{ gap: "10px" }}>
                     {row.map((num, i) => (
                       <LottoBall key={i} number={num} size="md" />
                     ))}
