@@ -169,14 +169,14 @@ export default function LottoPage() {
               className="flex-1 min-w-[160px] max-w-xs flex flex-col items-center justify-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 rounded-lg shadow-md border-2 border-blue-300 hover:scale-105 hover:shadow-xl hover:ring-2 hover:ring-blue-300 transition-all duration-150 focus:outline-none focus:ring-4 focus:ring-purple-300 px-4"
             >
               <span className="text-2xl">🎲</span>
-              <span>번호 생성하기 (무작위)</span>
+              <span>무작위 번호</span>
             </button>
             <button
               onClick={generatePatternLottoNumbers}
               className="flex-1 min-w-[160px] max-w-xs flex flex-col items-center justify-center gap-1 bg-gradient-to-r from-green-500 to-lime-500 text-white font-bold py-3 rounded-lg shadow-md border-2 border-green-300 hover:scale-105 hover:shadow-xl hover:ring-2 hover:ring-green-300 transition-all duration-150 focus:outline-none focus:ring-4 focus:ring-lime-300 px-4"
             >
               <span className="text-2xl">⭐️</span>
-              <span>번호 생성하기 (최근 10회 + 홀짝 3:3)</span>
+              <span>최근 10회 + 홀짝 3:3</span>
             </button>
             <button
               onClick={clearLottoNumbers}
