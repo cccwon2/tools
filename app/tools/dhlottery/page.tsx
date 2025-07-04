@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import LottoBall from "../../components/LottoBall";
+import lottoData from "../../../public/lottoNum.json";
 
 interface LottoResult {
   totSellamnt: number;
@@ -73,6 +74,43 @@ export default function LottoPage() {
     }
   };
 
+  // 최근 10회 자주 나온 번호 + 홀짝 3:3 생성 함수
+  const generatePatternLottoNumbers = () => {
+    // 최근 10회 데이터 추출
+    const recent10 = lottoData.lottoResults.slice(0, 10);
+    // 번호별 빈도 계산
+    const freq: Record<number, number> = {};
+    for (const round of recent10) {
+      for (let i = 1; i <= 6; i++) {
+        const n = round[`drwtNo${i}`];
+        freq[n] = (freq[n] || 0) + 1;
+      }
+    }
+    // 빈도순 정렬 (내림차순)
+    const sorted = Object.entries(freq)
+      .map(([num, count]) => ({ num: Number(num), count }))
+      .sort((a, b) => b.count - a.count || a.num - b.num);
+    // 상위 20개 번호 후보군(홀/짝 분리)
+    const topNums = sorted.slice(0, 20).map((v) => v.num);
+    const even = topNums.filter((n) => n % 2 === 0);
+    const odd = topNums.filter((n) => n % 2 === 1);
+    // 홀짝 3:3 랜덤 추출
+    const pickRandom = (arr: number[], cnt: number) => {
+      const copy = [...arr];
+      const res: number[] = [];
+      while (res.length < cnt && copy.length > 0) {
+        const idx = Math.floor(Math.random() * copy.length);
+        res.push(copy[idx]);
+        copy.splice(idx, 1);
+      }
+      return res;
+    };
+    const pickOdd = pickRandom(odd, 3);
+    const pickEven = pickRandom(even, 3);
+    const result = [...pickOdd, ...pickEven].sort((a, b) => a - b);
+    setLottoNumbersList((prev) => [result, ...prev].slice(0, 10));
+  };
+
   useEffect(() => {
     fetchLatestLottoResult();
   }, []);
@@ -125,18 +163,27 @@ export default function LottoPage() {
           </div>
 
           {/* 버튼 */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-row gap-4 bg-gradient-to-br from-blue-100 to-purple-100 p-4 rounded-2xl shadow-inner border border-blue-200 mb-2 w-full max-w-2xl mx-auto items-stretch justify-center">
             <button
               onClick={generateLottoNumbers}
-              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 rounded-lg hover:opacity-90 transition"
+              className="flex-1 min-w-[160px] max-w-xs flex flex-col items-center justify-center gap-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3 rounded-lg shadow-md border-2 border-blue-300 hover:scale-105 hover:shadow-xl hover:ring-2 hover:ring-blue-300 transition-all duration-150 focus:outline-none focus:ring-4 focus:ring-purple-300 px-4"
             >
-              번호 생성하기
+              <span className="text-2xl">🎲</span>
+              <span>번호 생성하기 (무작위)</span>
+            </button>
+            <button
+              onClick={generatePatternLottoNumbers}
+              className="flex-1 min-w-[160px] max-w-xs flex flex-col items-center justify-center gap-1 bg-gradient-to-r from-green-500 to-lime-500 text-white font-bold py-3 rounded-lg shadow-md border-2 border-green-300 hover:scale-105 hover:shadow-xl hover:ring-2 hover:ring-green-300 transition-all duration-150 focus:outline-none focus:ring-4 focus:ring-lime-300 px-4"
+            >
+              <span className="text-2xl">⭐️</span>
+              <span>번호 생성하기 (최근 10회 + 홀짝 3:3)</span>
             </button>
             <button
               onClick={clearLottoNumbers}
-              className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 rounded-lg hover:opacity-90 transition"
+              className="flex-1 min-w-[160px] max-w-xs flex flex-col items-center justify-center gap-1 bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold py-3 rounded-lg shadow-md border-2 border-pink-300 hover:scale-105 hover:shadow-xl hover:ring-2 hover:ring-pink-300 transition-all duration-150 focus:outline-none focus:ring-4 focus:ring-red-300 px-4"
             >
-              초기화
+              <span className="text-2xl">♻️</span>
+              <span>초기화</span>
             </button>
           </div>
 
