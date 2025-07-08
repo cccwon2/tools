@@ -1,6 +1,18 @@
 {
   "lottoResults": [
     {
+      "drwNo": 1179,
+      "drwNoDate": "2025.07.05",
+      "drwtNo1": 3,
+      "drwtNo2": 16,
+      "drwtNo3": 18,
+      "drwtNo4": 24,
+      "drwtNo5": 40,
+      "drwtNo6": 44,
+      "bnusNo": 21,
+      "returnValue": "success"
+    },
+    {
       "drwNo": 1178,
       "drwNoDate": "2025.06.28",
       "drwtNo1": 5,
